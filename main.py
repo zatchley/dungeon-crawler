@@ -1,8 +1,13 @@
 import sys
+from constants import DUNGEON_MAX_SIZE
+from dungeon import Dungeon, Room
 
 def main():
     print("Hello from dungeon-crawler!")
-    start()
+    #start()
+    dungeon = Dungeon([], DUNGEON_MAX_SIZE)
+    dungeon.gen_dungeon()
+    dungeon.print_dungeon()
 
 
 def start():

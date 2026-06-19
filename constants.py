@@ -1,0 +1,1 @@
+DUNGEON_MAX_SIZE = (5, 5)
