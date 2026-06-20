@@ -7,7 +7,7 @@ def main():
     #start()
     dungeon = Dungeon([], DUNGEON_MAX_SIZE)
     dungeon.gen_dungeon()
-    dungeon.print_dungeon()
+    #dungeon.print_dungeon()
 
 
 def start():
