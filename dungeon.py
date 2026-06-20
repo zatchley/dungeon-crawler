@@ -1,5 +1,6 @@
 # Imports
 import random
+import time
 from collections import defaultdict, deque
 from constants import DUNGEON_MAX_SIZE
 
@@ -22,14 +23,27 @@ class Dungeon():
         '''
         print(f"\nGenerating dungeon of size: {self.size}x{self.size}")
 
-        self.rooms = defaultdict(list)
         entrance = self.gen_entrance()
-        self.rooms[entrance] = []
         print(f"\nEntrance generated at coordinates: {entrance.coordinates} with doors: {entrance.doors}")
 
-        queue = deque([entrance])
-        visited = set()
-        visited.add(entrance.coordinates)
+        time_start = time.perf_counter()
+        while len(self.rooms) < int(pow(self.size, 2) * 0.75):
+            self.rooms = defaultdict(list)
+            self.rooms[entrance] = []
+            queue = deque([entrance])
+            visited = set()
+            visited.add(entrance.coordinates)
+            self.generation_loop(queue, visited)
+        
+        time_end = time.perf_counter()
+        print(f"\nGenerated dungeon with {len(self.rooms)} rooms in {time_end - time_start:.4f} seconds.\n")
+
+    def generation_loop(self, queue: deque[Room], visited: set[tuple[int, int]]):
+        '''
+        A helper function for the dungeon generation process. It performs a 
+        breadth-first search to generate rooms and connect them based on the 
+        doors of the current room.
+        '''
         while queue:
             current_room = queue.popleft()
             print(f"\nCurrent room: {current_room.coordinates} with doors: {current_room.doors}")
@@ -57,7 +71,6 @@ class Dungeon():
                         visited.add(next_coordinates)
                     else:
                         print(f"There's already a room here.")
-        print(f"\nGenerated dungeon with {len(self.rooms)} rooms.\n")
 
     def gen_entrance(self) -> Room:
         '''
@@ -117,16 +130,6 @@ class Dungeon():
         elif door == 3:  # West
             return (coordinates[0], coordinates[1] - 1)
 
-    def gen_neighbor(self, room: Room, door: str) -> Room:
-        '''
-        Generates a neighboring room based on the given room and door. The door 
-        is a string of 4 characters, where each character represents a direction 
-        (north, east, south, west) and is either "0" or "1" to indicate whether 
-        there is a door in that direction.
-        '''
-        next_coordinates = self.get_next_coordinates(room.coordinates, door)
-        return self.gen_room(next_coordinates[0], next_coordinates[1])
- 
     def gen_room(self, pos_x: int, pos_y: int) -> Room:
         '''
         Generates a room at the given coordinates. The coordinates are a tuple 
