@@ -25,12 +25,11 @@ class Dungeon():
         print(f"\nGenerating dungeon of size: {self.size}x{self.size}")
         min_rooms = int(pow(self.size, 2) * 0.75)
 
-        entrance = self.gen_entrance()
-        print(f"\nEntrance generated at coordinates: {entrance.coordinates} with doors: {entrance.doors}")
-
         time_start = time.perf_counter()
         while len(self.rooms) < min_rooms:
-            print(f"\nStarting dungeon generation with entrance at {entrance.coordinates} with doors: {entrance.doors}")
+            entrance = self.gen_entrance()
+            print(f"\nEntrance generated at coordinates: {entrance.coordinates} with doors: {entrance.doors}")
+
             self.rooms = defaultdict(list)
             self.rooms[entrance] = [None, None, None, None]
             queue = deque([entrance])
@@ -38,7 +37,8 @@ class Dungeon():
             visited.add(entrance.coordinates)
             self.generation_loop(queue, visited)
             if len(self.rooms) < min_rooms:
-                print(f"\nGenerated dungeon with only {len(self.rooms)} rooms. Regenerating...\n")
+                print(f"\nGenerated dungeon with only {len(self.rooms)} rooms. Regenerating...")
+                print("-" * 50)
         
         time_end = time.perf_counter()
         print(f"\nGenerated dungeon with {len(self.rooms)} rooms in {time_end - time_start:.4f} seconds.\n")
@@ -86,7 +86,6 @@ class Dungeon():
         doors_list = []
         for i in doors:
             doors_list.append(i)
-        print(f"Starting doors: {doors}")
 
         entrance_side = random.randint(0, 3)
         doors_list[entrance_side] = "1"
@@ -225,18 +224,20 @@ class Dungeon():
                 if (room_x, room_y) in [room.coordinates for room in self.rooms]:
                     room = [room for room in self.rooms if room.coordinates == (room_x, room_y)][0]
                     if i % 4 == 0:
-                        if (room.doors[0] == "1" and 
-                            j % 9 > 2 and j % 9 < 7 and 
-                            (i > 0 or room.type == "entrance") and
-                            room.visited):
+                        room_n = self.rooms[room][0] if self.rooms[room][0] else None
+                        if ((room.visited or (room_n and room_n.visited)) and 
+                            room.doors[0] == "1" and
+                            (i > 0 or room.type == "entrance") and 
+                            j % 9 > 2 and j % 9 < 7):
                             print(" ", end="")
                         else:
                             print("-", end="")
                     elif j % 9 == 0:
-                        if (room.doors[3] == "1" and 
+                        room_w = self.rooms[room][3] if self.rooms[room][3] else None
+                        if ((room.visited or (room_w and room_w.visited)) and 
+                            room.doors[3] == "1" and
                             i % 4 == 2 and 
-                            (j > 0 or room.type == "entrance") and
-                            room.visited):
+                            (j > 0 or room.type == "entrance")):
                             print(" ", end="")
                         else:
                             print("|", end="")
@@ -249,29 +250,29 @@ class Dungeon():
                     room_y = j // 9
                     if (room_x, room_y) in [room.coordinates for room in self.rooms]:
                         room = [room for room in self.rooms if room.coordinates == (room_x, room_y)][0]
-                        if (room.doors[2] == "1" and 
-                            j % 9 > 2 and j % 9 < 7 and 
-                            room.type == "entrance" and
-                            room.visited):
+                        if (room.type == "entrance" and 
+                            room.doors[2] == "1" and 
+                            j % 9 > 2 and j % 9 < 7):
                             print(" ", end="")
                             continue
                         else:
                             print("-", end="")
                             continue
+
                     room_x = i // 4
                     room_y = (j - 1) // 9
                     if (room_x, room_y) in [room.coordinates for room in self.rooms]:
                         room = [room for room in self.rooms if room.coordinates == (room_x, room_y)][0]
-                        if (room.doors[1] == "1" and 
-                            i % 4 == 2 and 
-                            room.type == "entrance" and
-                            room.visited):
+                        if (room.type == "entrance" and 
+                            room.doors[1] == "1" and 
+                            i % 4 == 2):
                             print(" ", end="")
                             continue
                         else:
                             print("|", end="")
                             continue
-                    elif i == 0 or i == num_rows - 1:
+
+                    if i == 0 or i == num_rows - 1:
                         print("-", end="")
                     elif j == 0 or j == num_cols - 1:
                         print("|", end="")
