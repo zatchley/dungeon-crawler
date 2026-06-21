@@ -32,7 +32,7 @@ class Dungeon():
         while len(self.rooms) < min_rooms:
             print(f"\nStarting dungeon generation with entrance at {entrance.coordinates} with doors: {entrance.doors}")
             self.rooms = defaultdict(list)
-            self.rooms[entrance] = []
+            self.rooms[entrance] = [None, None, None, None]
             queue = deque([entrance])
             visited = set()
             visited.add(entrance.coordinates)
@@ -69,8 +69,9 @@ class Dungeon():
                     if next_coordinates not in visited:
                         next_room = self.gen_room(next_coordinates[0], 
                                                   next_coordinates[1])
-                        self.rooms[current_room].append(next_room)
-                        self.rooms[next_room].append(current_room)
+                        self.rooms[current_room][i] = next_room
+                        self.rooms[next_room] = [None, None, None, None]
+                        self.rooms[next_room][(i + 2) % 4] = current_room
                         queue.append(next_room)
                         visited.add(next_coordinates)
                     else:
@@ -81,43 +82,47 @@ class Dungeon():
         Generates an entrance for the dungeon. The entrance is placed on a 
         random edge of the dungeon.
         '''
+        doors = f"{random.randint(0, 15):0{4}b}"
+        doors_list = []
+        for i in doors:
+            doors_list.append(i)
+        print(f"Starting doors: {doors}")
+
         entrance_side = random.randint(0, 3)
+        doors_list[entrance_side] = "1"
 
         # Entrance is on the north or south edge
         if entrance_side == 0 or entrance_side == 2:
-            entrance_y = random.randint(0, self.size - 1)
-            if entrance_side == 0 and entrance_y == 0:
-                # North edge entrance at the northwest corner
-                return Room(0, entrance_y, "1110", "entrance", True)
-            elif entrance_side == 2 and entrance_y == 0:
-                # South edge entrance at the southwest corner
-                return Room(self.size - 1, entrance_y, "1110", "entrance", True)
-            elif entrance_side == 0 and entrance_y == self.size - 1:
-                # North edge entrance at the northeast corner
-                return Room(0, entrance_y, "1011", "entrance", True)
-            elif entrance_side == 2 and entrance_y == self.size - 1:
-                # South edge entrance at the southeast corner
-                return Room(self.size - 1, entrance_y, "1011", "entrance", True)
+            if entrance_side == 0:
+                entrance_x = 0
             else:
-                return Room(self.size - 1, entrance_y, "1111", "entrance", True)
+                entrance_x = self.size - 1
+            entrance_y = random.randint(0, self.size - 1)
+
+            if entrance_y == self.size - 1:
+                # Entrance is in the east corner
+                doors_list[1] = "0"
+            elif entrance_y == 0:
+                # Entrance is in the west corner
+                doors_list[3] = "0"
         
         # Entrance is on the east or west edge
         if entrance_side == 1 or entrance_side == 3:
-            entrance_x = random.randint(0, self.size - 1)
-            if entrance_side == 1 and entrance_x == 0:
-                # East edge entrance at the northeast corner
-                return Room(entrance_x, 0, "0111", "entrance", True)
-            elif entrance_side == 3 and entrance_x == 0:
-                # West edge entrance at the northwest corner
-                return Room(entrance_x, self.size - 1, "0111", "entrance", True)
-            elif entrance_side == 1 and entrance_x == self.size - 1:
-                # East edge entrance at the southeast corner
-                return Room(entrance_x, 0, "1101", "entrance", True)
-            elif entrance_side == 3 and entrance_x == self.size - 1:
-                # West edge entrance at the southwest corner
-                return Room(entrance_x, self.size - 1, "1101", "entrance", True)
+            if entrance_side == 1:
+                entrance_y = self.size - 1
             else:
-                return Room(entrance_x, self.size - 1, "1111", "entrance", True)
+                entrance_y = 0
+            entrance_x = random.randint(0, self.size - 1)
+
+            if entrance_x == 0:
+                # Entrance is in the north corner
+                doors_list[0] = "0"
+            elif entrance_x == self.size - 1:
+                # Entrance is in the south corner
+                doors_list[2] = "0"
+        
+        doors = "".join(doors_list)
+        return Room(entrance_x, entrance_y, doors, "entrance", True)
 
     def gen_room(self, pos_x: int, pos_y: int) -> Room:
         '''
@@ -125,67 +130,63 @@ class Dungeon():
         of (x, y).
         '''
         doors = f"{random.randint(0, 15):0{4}b}"
+        doors_list = []
+        for i in doors:
+            doors_list.append(i)
         print(f"Starting doors: {doors}")
         
         # Remove doors that lead outside the dungeon
-        if pos_x == 0 and doors[0] == "1":
+        if pos_x == 0 and doors_list[0] == "1":
             print("Removing north door")
-            doors = f"{(int(doors, 2) ^ int('1000', 2)):0{4}b}"
-            print(f"New doors: {doors}")
-        if pos_y == self.size - 1 and doors[1] == "1":
+            doors_list[0] = "0"
+        if pos_y == self.size - 1 and doors_list[1] == "1":
             print("Removing east door")
-            doors = f"{(int(doors, 2) ^ int('0100', 2)):0{4}b}"
-            print(f"New doors: {doors}")
-        if pos_x == self.size - 1 and doors[2] == "1":
+            doors_list[1] = "0"
+        if pos_x == self.size - 1 and doors_list[2] == "1":
             print("Removing south door")
-            doors = f"{(int(doors, 2) ^ int('0010', 2)):0{4}b}"
-            print(f"New doors: {doors}")
-        if pos_y == 0 and doors[3] == "1":
+            doors_list[2] = "0"
+        if pos_y == 0 and doors_list[3] == "1":
             print("Removing west door")
-            doors = f"{(int(doors, 2) ^ int('0001', 2)):0{4}b}"
-            print(f"New doors: {doors}")
-        
+            doors_list[3] = "0"
 
         # Match doors with adjacent rooms
         for room in self.rooms:
             # Check north
             if pos_x > 0 and room.coordinates == (pos_x - 1, pos_y):
                 print(f"Has north neighbor with doors: {room.doors}")
-                if room.doors[2] != doors[0]:
+                if room.doors[2] != doors_list[0]:
                     print("Matching north door with neighbor's south door")
-                    doors = f"{(int(doors, 2) ^ int('1000', 2)):0{4}b}"
-                    print(f"New doors: {doors}")
+                    doors_list[0] = room.doors[2]
                 else:
                     print("North door already matches neighbor's south door")
             # Check east
             if pos_y < self.size - 1 and room.coordinates == (pos_x, pos_y + 1):
                 print(f"Has east neighbor with doors: {room.doors}")
-                if room.doors[3] != doors[1]:
+                if room.doors[3] != doors_list[1]:
                     print("Matching east door with neighbor's west door")
-                    doors = f"{(int(doors, 2) ^ int('0100', 2)):0{4}b}"
-                    print(f"New doors: {doors}")
+                    doors_list[1] = room.doors[3]
                 else:
                     print("East door already matches neighbor's west door")
             # Check south
             if pos_x < self.size - 1 and room.coordinates == (pos_x + 1, pos_y):
                 print(f"Has south neighbor with doors: {room.doors}")
-                if room.doors[0] != doors[2]:
+                if room.doors[0] != doors_list[2]:
                     print("Matching south door with neighbor's north door")
-                    doors = f"{(int(doors, 2) ^ int('0010', 2)):0{4}b}"
-                    print(f"New doors: {doors}")
+                    doors_list[2] = room.doors[0]
                 else:
                     print("South door already matches neighbor's north door")
             # Check west
             if pos_y > 0 and room.coordinates == (pos_x, pos_y - 1):
                 print(f"Has west neighbor with doors: {room.doors}")
-                if room.doors[1] != doors[3]:
+                if room.doors[1] != doors_list[3]:
                     print("Matching west door with neighbor's east door")
-                    doors = f"{(int(doors, 2) ^ int('0001', 2)):0{4}b}"
-                    print(f"New doors: {doors}")
+                    doors_list[3] = room.doors[1]
                 else:
                     print("West door already matches neighbor's east door")
+        
+        doors = "".join(doors_list)
         print(f"Generated room at coordinates: ({pos_x}, {pos_y}) with doors: {doors}")
-        return Room(pos_x, pos_y, doors, "normal", False)
+        return Room(pos_x, pos_y, doors, "empty", False)
 
     def get_next_coordinates(self, coordinates: tuple[int, int], door: int) -> tuple[int, int]:
         '''
