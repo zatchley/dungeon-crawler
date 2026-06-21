@@ -8,6 +8,7 @@ def main():
     dungeon = Dungeon([], DUNGEON_MAX_SIZE)
     dungeon.gen_dungeon()
     #dungeon = TRAINING_DUNGEON
+    
     dungeon.print_dungeon()
 
 
