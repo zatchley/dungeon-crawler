@@ -13,9 +13,10 @@ class Room():
 
 
 class Dungeon():
-    def __init__(self, rooms: dict[Room, list[Room]], size: int):
+    def __init__(self, rooms: dict[Room, list[Room]], size: int, player_pos: tuple[int, int]=(0, 0)):
         self.rooms = rooms
         self.size = size
+        self.player_pos = player_pos
 
     def gen_dungeon(self):
         '''
@@ -28,6 +29,7 @@ class Dungeon():
         time_start = time.perf_counter()
         while len(self.rooms) < min_rooms:
             entrance = self.gen_entrance()
+            self.player_pos = entrance.coordinates
             print(f"\nEntrance generated at coordinates: {entrance.coordinates} with doors: {entrance.doors}")
 
             self.rooms = defaultdict(list)
@@ -213,14 +215,14 @@ class Dungeon():
         according to their coordinates.
         '''
         num_rows = self.size * 4 + 1
-        num_cols = self.size * 9 + 1
+        num_cols = self.size * 10 + 1
         for i in range(num_rows):
             for j in range(num_cols):
-                if (i % 4 == 0 and j % 9 == 0):
+                if (i % 4 == 0 and j % 10 == 0):
                         print("+", end="")
                         continue
                 room_x = i // 4
-                room_y = j // 9
+                room_y = j // 10
                 if (room_x, room_y) in [room.coordinates for room in self.rooms]:
                     room = [room for room in self.rooms if room.coordinates == (room_x, room_y)][0]
                     if i % 4 == 0:
@@ -228,11 +230,11 @@ class Dungeon():
                         if ((room.visited or (room_n and room_n.visited)) and 
                             room.doors[0] == "1" and
                             (i > 0 or room.type == "entrance") and 
-                            j % 9 > 2 and j % 9 < 7):
+                            j % 10 > 2 and j % 10 < 8):
                             print(" ", end="")
                         else:
                             print("-", end="")
-                    elif j % 9 == 0:
+                    elif j % 10 == 0:
                         room_w = self.rooms[room][3] if self.rooms[room][3] else None
                         if ((room.visited or (room_w and room_w.visited)) and 
                             room.doors[3] == "1" and
@@ -241,18 +243,21 @@ class Dungeon():
                             print(" ", end="")
                         else:
                             print("|", end="")
+                    elif (i % 4 == 2 and j % 10 == 5 and 
+                          room.coordinates == self.player_pos):
+                        print("X", end="")
                     elif room.visited:
                         print(" ", end="")
                     else:
                         print("-", end="")
                 else:
                     room_x = (i - 1) // 4
-                    room_y = j // 9
+                    room_y = j // 10
                     if (room_x, room_y) in [room.coordinates for room in self.rooms]:
                         room = [room for room in self.rooms if room.coordinates == (room_x, room_y)][0]
                         if (room.type == "entrance" and 
                             room.doors[2] == "1" and 
-                            j % 9 > 2 and j % 9 < 7):
+                            j % 10 > 2 and j % 10 < 8):
                             print(" ", end="")
                             continue
                         else:
@@ -260,7 +265,7 @@ class Dungeon():
                             continue
 
                     room_x = i // 4
-                    room_y = (j - 1) // 9
+                    room_y = (j - 1) // 10
                     if (room_x, room_y) in [room.coordinates for room in self.rooms]:
                         room = [room for room in self.rooms if room.coordinates == (room_x, room_y)][0]
                         if (room.type == "entrance" and 
