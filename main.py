@@ -1,5 +1,5 @@
 import sys
-from constants import DUNGEON_MAX_SIZE
+from constants import DUNGEON_MAX_SIZE, TRAINING_DUNGEON
 from dungeon import Dungeon, Room
 
 def main():
@@ -7,7 +7,8 @@ def main():
     #start()
     dungeon = Dungeon([], DUNGEON_MAX_SIZE)
     dungeon.gen_dungeon()
-    #dungeon.print_dungeon()
+    #dungeon = TRAINING_DUNGEON
+    dungeon.print_dungeon()
 
 
 def start():
