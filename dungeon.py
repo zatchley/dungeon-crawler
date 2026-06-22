@@ -11,6 +11,22 @@ class Room():
         self.type = type
         self.visited = visited
 
+    def get_description(self):
+        # TODO: Make unique descriptions for each type of room
+
+        directions = ["north", "east", "south", "west"]
+        open_doors = []
+        for i in len(self.doors):
+            if self.doors[i] == "1":
+                open_doors.append(directions[i])
+        if len(open_doors) == 1:
+            print(f"A door leads to the {open_doors[0]}.")
+        elif len(open_doors) == 2:
+            print(f"Doors lead to the {open_doors[0]} and {open_doors[1]}.")
+        elif len(open_doors) == 3:
+            print(f"Doors lead to the {open_doors[0]}, {open_doors[1]}, and {open_doors[2]}.")
+        else:
+            print(f"Doors lead in all directions.")
 
 class Dungeon():
     def __init__(self, rooms: dict[Room, list[Room]], size: int, player_pos: tuple[int, int]=(0, 0)):
