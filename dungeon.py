@@ -2,6 +2,7 @@
 import random
 import time
 from collections import defaultdict, deque
+from player import Player
 #from constants import DUNGEON_MAX_SIZE
 
 class Room():
@@ -29,10 +30,15 @@ class Room():
             print(f"Doors lead in all directions.")
 
 class Dungeon():
-    def __init__(self, rooms: dict[Room, list[Room]], size: int, player_pos: tuple[int, int]=(0, 0)):
+    def __init__(self, player: Player, rooms: dict[Room, list[Room]], size: int):
+        self.player = player
         self.rooms = rooms
         self.size = size
-        self.player_pos = player_pos
+        self.player_pos = (0, 0)
+        self.commands = {
+                            "map": self.map,
+                            "move": self.move
+                        }
 
     def gen_dungeon(self):
         '''
@@ -45,7 +51,7 @@ class Dungeon():
         time_start = time.perf_counter()
         while len(self.rooms) < min_rooms:
             entrance = self.gen_entrance()
-            self.player_pos = entrance.coordinates
+            self.set_player_start(entrance)
             print(f"\nEntrance generated at coordinates: {entrance.coordinates} with doors: {entrance.doors}")
 
             self.rooms = defaultdict(list)
@@ -220,7 +226,10 @@ class Dungeon():
         elif door == 3:  # West
             return (coordinates[0], coordinates[1] - 1)
 
-    def print_dungeon(self):
+    def set_player_start(self, entrance: Room) -> None:
+        self.player_pos = entrance.coordinates
+
+    def print_dungeon(self) -> None:
         '''
         Prints the dungeon to the console. The dungeon is represented as a grid 
         of rooms, where each room is represented by a 4x9 block of characters. 
@@ -300,3 +309,48 @@ class Dungeon():
                     else:
                         print("-", end="")
             print()
+
+    def map(self, arg: None) -> None:
+        self.print_dungeon()
+
+    def move(self, direction: str | None) -> None:
+        if direction == None:
+            print("Move where?")
+            return
+        else:
+            if direction == "n":
+                direction = "north"
+            elif direction == "e":
+                direction = "east"
+            elif direction == "s":
+                direction = "south"
+            elif direction == "w":
+                direction = "west"
+            
+        if (direction != "north" and direction != "east" and
+            direction != "south" and direction != "west"):
+            print(f"'{direction}' is not a direction.")
+            return
+
+        current_room = [room for room in self.rooms if self.player_pos == room.coordinates][0]
+        if direction == "north" and current_room.doors[0] == "1":
+            self.player_pos = (self.player_pos[0] - 1, self.player_pos[1])
+            new_room = self.rooms[current_room][0]
+        elif direction == "east" and current_room.doors[1] == "1":
+            self.player_pos = (self.player_pos[0], self.player_pos[1] + 1)
+            new_room = self.rooms[current_room][1]
+        elif direction == "south" and current_room.doors[2] == "1":
+            self.player_pos = (self.player_pos[0] + 1, self.player_pos[1])
+            new_room = self.rooms[current_room][2]
+        elif direction == "west" and current_room.doors[3] == "1":
+            self.player_pos = (self.player_pos[0], self.player_pos[1] - 1)
+            new_room = self.rooms[current_room][3]
+        else:
+            print("A wall blocks your path.")
+            return
+        
+        new_room.visited = True
+        print(f"You walk through the {direction}ern door.")
+        return
+        
+        
