@@ -7,10 +7,13 @@ from tutorial import tutorial_main
 def main():
     #print("Hello from dungeon-crawler!")
     #start()
-    player = Player()
-    dungeon = Dungeon(player, [], 3)
-    dungeon.gen_dungeon()
+    #player = Player()
+    #dungeon = Dungeon(player, [], 3)
+    #dungeon.gen_dungeon()
 
+    #dungeon = TRAINING_DUNGEON
+    tutorial_main()
+'''
     player.in_dungeon = True
 
     print("Welcome to the dungeon\n\n")
@@ -20,7 +23,7 @@ def main():
         if player.in_dungeon:
             location = dungeon
         cmd_parser(command, location)
-
+'''
 def cmd_parser(command: str, location) -> None:
         cmd_parts = command.split(" ")
         verb = cmd_parts[0].lower()
@@ -37,10 +40,7 @@ def cmd_parser(command: str, location) -> None:
 
         if verb in location.commands:
             location.commands[verb](noun)
-    #dungeon = TRAINING_DUNGEON
-    #tutorial_main()
     
-    #dungeon.print_dungeon()
 
 
 def start():

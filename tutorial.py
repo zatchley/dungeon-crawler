@@ -3,7 +3,6 @@ from player import Player
 
 def tutorial_main():
     player = Player()
-    dungeon = Dungeon(player, [], 3)
     rooms = [Room(2, 1, "0111", "entrance", True), 
              Room(2, 2, "1001", "normal", False),
              Room(2, 0, "1100", "normal", False),
@@ -13,9 +12,8 @@ def tutorial_main():
              Room(1, 1, "1001", "normal", False),
              Room(0, 1, "0111", "normal", False),
              Room(0, 0, "0100", "normal", False)]
-    
-
-    dungeon.player_pos = (2, 1)
+    dungeon = Dungeon(player, [], 3)
+    dungeon.gen_dungeon(rooms)
     player.in_dungeon = True
 
     print("Welcome to the training dungeon\n\n")

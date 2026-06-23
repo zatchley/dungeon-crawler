@@ -40,7 +40,7 @@ class Dungeon():
                             "move": self.move
                         }
 
-    def gen_dungeon(self):
+    def gen_dungeon(self, rooms: list[Room] | None) -> None:
         '''
         Generates a dungeon of the given size. The size is a tuple of 
         (width, height).
@@ -50,7 +50,10 @@ class Dungeon():
 
         time_start = time.perf_counter()
         while len(self.rooms) < min_rooms:
-            entrance = self.gen_entrance()
+            if rooms == None:
+                entrance = self.gen_entrance()
+            else:
+                entrance = [room for room in rooms if room.type == "entrance"][0]
             self.set_player_start(entrance)
             print(f"\nEntrance generated at coordinates: {entrance.coordinates} with doors: {entrance.doors}")
 
@@ -59,7 +62,7 @@ class Dungeon():
             queue = deque([entrance])
             visited = set()
             visited.add(entrance.coordinates)
-            self.generation_loop(queue, visited)
+            self.generation_loop(rooms, queue, visited)
             if len(self.rooms) < min_rooms:
                 print(f"\nGenerated dungeon with only {len(self.rooms)} rooms. Regenerating...")
                 print("-" * 50)
@@ -67,7 +70,7 @@ class Dungeon():
         time_end = time.perf_counter()
         print(f"\nGenerated dungeon with {len(self.rooms)} rooms in {time_end - time_start:.4f} seconds.\n")
 
-    def generation_loop(self, queue: deque[Room], visited: set[tuple[int, int]]):
+    def generation_loop(self, rooms: list[Room], queue: deque[Room], visited: set[tuple[int, int]]):
         '''
         A helper function for the dungeon generation process. It performs a 
         breadth-first search to generate rooms and connect them based on the 
@@ -91,8 +94,11 @@ class Dungeon():
                     
                     print(f"\nGenerating room at {next_coordinates}")
                     if next_coordinates not in visited:
-                        next_room = self.gen_room(next_coordinates[0], 
-                                                  next_coordinates[1])
+                        if rooms == None:
+                            next_room = self.gen_room(next_coordinates[0], 
+                                                    next_coordinates[1])
+                        else:
+                            next_room = [room for room in rooms if room.coordinates == next_coordinates][0]
                         self.rooms[current_room][i] = next_room
                         self.rooms[next_room] = [None, None, None, None]
                         self.rooms[next_room][(i + 2) % 4] = current_room
