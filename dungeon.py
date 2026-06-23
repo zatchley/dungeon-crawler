@@ -263,8 +263,11 @@ class Dungeon():
                             (i > 0 or room.type == "entrance") and 
                             j % 10 > 2 and j % 10 < 8):
                             print(" ", end="")
-                        else:
+                        elif (i == 0 or
+                              (room.visited or room_n and room_n.visited)):
                             print("-", end="")
+                        else:
+                            print("~", end="")
                     elif j % 10 == 0:
                         room_w = self.rooms[room][3] if self.rooms[room][3] else None
                         if ((room.visited or (room_w and room_w.visited)) and 
@@ -272,15 +275,18 @@ class Dungeon():
                             i % 4 == 2 and 
                             (j > 0 or room.type == "entrance")):
                             print(" ", end="")
-                        else:
+                        elif (j == 0 or
+                              (room.visited or room_w and room_w.visited)):
                             print("|", end="")
+                        else:
+                            print("~", end="")
                     elif (i % 4 == 2 and j % 10 == 5 and 
                           room.coordinates == self.player_pos):
                         print("X", end="")
                     elif room.visited:
                         print(" ", end="")
                     else:
-                        print("-", end="")
+                        print("~", end="")
                 else:
                     room_x = (i - 1) // 4
                     room_y = j // 10
