@@ -15,13 +15,12 @@ def tutorial_main():
     dungeon = Dungeon(player, [], 3)
     dungeon.gen_dungeon(rooms)
     player.in_dungeon = True
+    location = dungeon
 
     print("Welcome to the training dungeon\n\n")
 
     while True:
         command = input(">:")
-        if player.in_dungeon:
-            location = dungeon
         cmd_parser(command, location)
 
 def cmd_parser(command: str, location) -> None:
@@ -35,8 +34,11 @@ def cmd_parser(command: str, location) -> None:
                 noun = noun.join(" ")
             else:
                 noun = noun[0]
-        else: 
-            noun = None
 
-        if verb in location.commands:
-            location.commands[verb](noun)
+            if verb in location.commands:
+                location.commands[verb](noun)
+        else: 
+            if verb in location.commands:
+                location.commands[verb]()
+
+        

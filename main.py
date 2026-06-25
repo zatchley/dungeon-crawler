@@ -1,72 +1,44 @@
 import sys
+import time
 from constants import DUNGEON_MAX_SIZE
 from player import Player
 from dungeon import Dungeon, Room
 from tutorial import tutorial_main
 
 def main():
-    #print("Hello from dungeon-crawler!")
-    #start()
-    player = Player()
-    dungeon = Dungeon(player, [], 3)
-    dungeon.gen_dungeon(None)
-    dungeon.print_dungeon()
-
-    #dungeon = TRAINING_DUNGEON
-    #tutorial_main()
-
-    player.in_dungeon = True
-
-    print("Welcome to the dungeon\n\n")
-
-    while True:
-        command = input(">:")
-        if player.in_dungeon:
-            location = dungeon
-        cmd_parser(command, location)
-
-def cmd_parser(command: str, location) -> None:
-        cmd_parts = command.split(" ")
-        verb = cmd_parts[0].lower()
-        if len(cmd_parts) > 1:
-            noun = cmd_parts[1:]
-            for word in noun:
-                word.lower()
-            if len(noun) > 1:
-                noun = noun.join(" ")
-            else:
-                noun = noun[0]
-        else: 
-            noun = None
-
-        if verb in location.commands:
-            location.commands[verb](noun)
-    
-
+    start()
 
 def start():
     print("[title splash]")
-    print("\n\n")
-    print("New Game")
-    print("Load Game")
+    print("\n")
+    print("New Game    <-- COMING SOON")
+    print("Load Game   <-- COMING SOON")
     print("Training")
-    print("Quit")
-    print("\n\n")
+    print("Quit")   
+    print("\n")
 
-    selection = input()
+    while True:
+        selection = input("\n>:")
 
-    match selection:
-        case "new" | "New" | "New Game":
-            pass
-        case "load" | "Load" | "Load Game":
-            pass
-        case "train" | "Train" | "Training":
-            pass
-        case "q" | "quit" | "Quit":
-            sys.exit
-        case _:
-            print("unknown command")
+        match selection:
+            case "new" | "New" | "New Game":
+                print_slow("\nThis option is not available yet.")
+            case "load" | "Load" | "Load Game":
+                print_slow("\nThis option is not available yet.")
+            case "train" | "Train" | "training" | "Training":
+                tutorial_main()
+            case "q" | "quit" | "Quit":
+                sys.exit()
+            case _:
+                print_slow("\nunknown command")
     
+def print_slow(message):
+    for letter in message:
+        sys.stdout.write(letter)
+        sys.stdout.flush()
+        time.sleep(0.07)
+    time.sleep(0.5)
+    print()
 
 
 if __name__ == "__main__":

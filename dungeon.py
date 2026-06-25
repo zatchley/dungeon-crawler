@@ -1,9 +1,11 @@
-# Imports
+#region Imports
 import random
+import sys
 import time
 from collections import defaultdict, deque
 from player import Player
 #from constants import DUNGEON_MAX_SIZE
+#endregion
 
 class Room():
     def __init__(self, pos_x: int, pos_y: int, doors: str, type: str, visited: bool):
@@ -36,10 +38,12 @@ class Dungeon():
         self.size = size
         self.player_pos = (0, 0)
         self.commands = {
-                            "map": self.map,
-                            "move": self.move
+                            "map": self.print_dungeon,
+                            "move": self.move,
+                            "quit": self.quit
                         }
 
+#region Dungeon Generation
     def gen_dungeon(self, rooms: list[Room] | None) -> None:
         '''
         Generates a dungeon of the given size. The size is a tuple of 
@@ -234,6 +238,7 @@ class Dungeon():
 
     def set_player_start(self, entrance: Room) -> None:
         self.player_pos = entrance.coordinates
+#endregion
 
     def print_dungeon(self) -> None:
         '''
@@ -322,8 +327,7 @@ class Dungeon():
                         print("-", end="")
             print()
 
-    def map(self, arg: None) -> None:
-        self.print_dungeon()
+#region Dungeon Commands
 
     def move(self, direction: str | None) -> None:
         if direction == None:
@@ -365,4 +369,17 @@ class Dungeon():
         print(f"You walk through the {direction}ern door.")
         return
         
-        
+    def quit(self):
+        print("Are you sure you want to quit?")
+        print("Unsaved progress will be lost.")
+        quit = input("(Y/N) >:")
+
+        while True:
+            if quit == "y" or quit == "Y":
+                sys.exit()
+            elif quit == "n" or quit == "N":
+                print()
+                break
+            else:
+                print("I don't understand.")
+#endregion
